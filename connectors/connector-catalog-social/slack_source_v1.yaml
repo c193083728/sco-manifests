@@ -1,0 +1,127 @@
+apiVersion: "sco1237896.github.com/v1"
+kind: "ConnectorDefinition"
+metadata:
+  name: "slack_source_v1"
+spec:
+  definition:
+    apiVersion: "camel.apache.org/v1"
+    kind: "Pipe"
+    metadata:
+      annotations:
+        sco1237896.github.com/catalog.group: "social"
+        sco1237896.github.com/catalog.id: "slack"
+        sco1237896.github.com/connector.description: "Receive messages from a Slack\
+          \ channel."
+        sco1237896.github.com/connector.group: "social"
+        sco1237896.github.com/connector.id: "slack_source_v1"
+        sco1237896.github.com/connector.title: "Slack source"
+        sco1237896.github.com/connector.version: "v1"
+        trait.camel.apache.org/container.request-cpu: "0.20"
+        trait.camel.apache.org/container.request-memory: "128M"
+        trait.camel.apache.org/deployment.progress-deadline-seconds: "30"
+        trait.camel.apache.org/container.image: "quay.io/sco1237896/connector-slack:main-17140b59c01c7dd0a2d657dfcbf5c346ff4a6705"
+    spec:
+      errorHandler:
+        log: {}
+      sink:
+        ref:
+          apiVersion: "camel.apache.org/v1"
+          kind: "Kamelet"
+          name: "connector-kafka-sink"
+      source:
+        ref:
+          apiVersion: "camel.apache.org/v1"
+          kind: "Kamelet"
+          name: "connector-slack-source"
+  resources:
+  - apiVersion: "camel.apache.org/v1alpha1"
+    kind: "Kamelet"
+    metadata:
+      name: "connector-slack-source"
+    spec:
+      definition:
+        title: "Slack Source"
+        description: "Receive messages from a Slack channel."
+        required:
+        - "channel"
+        - "token"
+        type: "object"
+        properties:
+          channel:
+            title: "Channel"
+            description: "The Slack channel to receive messages from."
+            type: "string"
+            example: "#myroom"
+          token:
+            title: "Token"
+            description: "The Bot User OAuth Access Token to access Slack. A Slack\
+              \ app that has the following permissions is required: `channels:history`,\
+              \ `groups:history`, `im:history`, `mpim:history`, `channels:read`, `groups:read`,\
+              \ `im:read`, and `mpim:read`."
+            type: "string"
+            format: "password"
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:password"
+            - "urn:camel:group:credentials"
+          delay:
+            title: "Delay"
+            description: "The delay between polls. If no unit provided, miliseconds\
+              \ is the default."
+            type: "string"
+            default: "60000"
+            example: "60s or 6000 or 1m"
+      types:
+        out:
+          mediaType: "application/json"
+  - apiVersion: "camel.apache.org/v1alpha1"
+    kind: "Kamelet"
+    metadata:
+      name: "connector-kafka-sink"
+    spec:
+      definition:
+        title: "Managed Kafka Sink"
+        description: |-
+          Send data to Managed Kafka topics.
+
+          Optionally, you can set the following properties in the header:
+
+          - `key`: as message key
+
+          - `partition-key`: as message partition key
+        required:
+        - "topic"
+        - "bootstrapServers"
+        type: "object"
+        properties:
+          topic:
+            title: "Topic Name"
+            description: "The name of the Kafka Topic to use."
+            type: "string"
+          bootstrapServers:
+            title: "Bootstrap Servers"
+            description: "Comma separated list of Kafka Broker URLs"
+            type: "string"
+          securityProtocol:
+            title: "Security Protocol"
+            description: "Protocol used to communicate with brokers. SASL_PLAINTEXT,\
+              \ PLAINTEXT, SASL_SSL and SSL are supported"
+            type: "string"
+          saslMechanism:
+            title: "SASL Mechanism"
+            description: "The Simple Authentication and Security Layer (SASL) Mechanism\
+              \ used."
+            type: "string"
+          user:
+            title: "Username"
+            description: "Username to authenticate to Kafka"
+            type: "string"
+            x-descriptors:
+            - "urn:camel:group:credentials"
+          password:
+            title: "Password"
+            description: "Password to authenticate to kafka"
+            type: "string"
+            format: "password"
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:password"
+            - "urn:camel:group:credentials"

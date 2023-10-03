@@ -1,0 +1,115 @@
+apiVersion: "sco1237896.github.com/v1"
+kind: "ConnectorDefinition"
+metadata:
+  name: "google_functions_sink_v1"
+spec:
+  definition:
+    apiVersion: "camel.apache.org/v1"
+    kind: "Pipe"
+    metadata:
+      annotations:
+        sco1237896.github.com/catalog.group: "gcp"
+        sco1237896.github.com/catalog.id: "google_functions"
+        sco1237896.github.com/connector.description: "Send data to Google Functions."
+        sco1237896.github.com/connector.group: "gcp"
+        sco1237896.github.com/connector.id: "google_functions_sink_v1"
+        sco1237896.github.com/connector.title: "Google Cloud Functions sink"
+        sco1237896.github.com/connector.version: "v1"
+        trait.camel.apache.org/container.request-cpu: "0.20"
+        trait.camel.apache.org/container.request-memory: "128M"
+        trait.camel.apache.org/deployment.progress-deadline-seconds: "30"
+        trait.camel.apache.org/container.image: "quay.io/sco1237896/connector-google-functions:main-17140b59c01c7dd0a2d657dfcbf5c346ff4a6705"
+    spec:
+      errorHandler:
+        log: {}
+      sink:
+        ref:
+          apiVersion: "camel.apache.org/v1"
+          kind: "Kamelet"
+          name: "connector-google-functions-sink"
+      source:
+        ref:
+          apiVersion: "camel.apache.org/v1"
+          kind: "Kamelet"
+          name: "connector-kafka-source"
+  resources:
+  - apiVersion: "camel.apache.org/v1alpha1"
+    kind: "Kamelet"
+    metadata:
+      name: "connector-kafka-source"
+    spec:
+      definition:
+        title: "Managed Kafka Source"
+        description: "Receive data from Managed Kafka topics."
+        required:
+        - "topic"
+        - "bootstrapServers"
+        type: "object"
+        properties:
+          topic:
+            title: "Topic Names"
+            description: "A comma-separated list of Kafka topic names."
+            type: "string"
+          bootstrapServers:
+            title: "Bootstrap Servers"
+            description: "Comma separated list of Kafka Broker URLs"
+            type: "string"
+          securityProtocol:
+            title: "Security Protocol"
+            description: "Protocol used to communicate with brokers. SASL_PLAINTEXT,\
+              \ PLAINTEXT, SASL_SSL and SSL are supported"
+            type: "string"
+          saslMechanism:
+            title: "SASL Mechanism"
+            description: "The Simple Authentication and Security Layer (SASL) Mechanism\
+              \ used."
+            type: "string"
+          user:
+            title: "Username"
+            description: "Username to authenticate to Kafka"
+            type: "string"
+            x-descriptors:
+            - "urn:camel:group:credentials"
+          password:
+            title: "Password"
+            description: "Password to authenticate to kafka"
+            type: "string"
+            format: "password"
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:password"
+            - "urn:camel:group:credentials"
+  - apiVersion: "camel.apache.org/v1alpha1"
+    kind: "Kamelet"
+    metadata:
+      name: "connector-google-functions-sink"
+    spec:
+      definition:
+        title: "Google Functions Sink"
+        description: "Send data to Google Functions."
+        required:
+        - "projectId"
+        - "functionName"
+        - "region"
+        - "serviceAccountKey"
+        type: "object"
+        properties:
+          projectId:
+            title: "Project Id"
+            description: "The Google Cloud Functions Project ID."
+            type: "string"
+          region:
+            title: "Region"
+            description: "The region where Google Cloud Functions has been deployed."
+            type: "string"
+          functionName:
+            title: "Function Name"
+            description: "The Function name."
+            type: "string"
+          serviceAccountKey:
+            title: "Service Account Key"
+            description: "The path to the service account key file that provides credentials\
+              \ for the Google Cloud Functions platform."
+            format: "password"
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:password"
+            - "urn:camel:group:credentials"

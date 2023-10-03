@@ -1,0 +1,161 @@
+apiVersion: "sco1237896.github.com/v1"
+kind: "ConnectorDefinition"
+metadata:
+  name: "sftp_sink_v1"
+spec:
+  definition:
+    apiVersion: "camel.apache.org/v1"
+    kind: "Pipe"
+    metadata:
+      annotations:
+        sco1237896.github.com/catalog.group: "storage"
+        sco1237896.github.com/catalog.id: "sftp"
+        sco1237896.github.com/connector.description: "Send data to an SFTP Server."
+        sco1237896.github.com/connector.group: "storage"
+        sco1237896.github.com/connector.id: "sftp_sink_v1"
+        sco1237896.github.com/connector.title: "SFTP sink"
+        sco1237896.github.com/connector.version: "v1"
+        trait.camel.apache.org/container.request-cpu: "0.20"
+        trait.camel.apache.org/container.request-memory: "128M"
+        trait.camel.apache.org/deployment.progress-deadline-seconds: "30"
+        trait.camel.apache.org/container.image: "quay.io/sco1237896/connector-sftp:main-17140b59c01c7dd0a2d657dfcbf5c346ff4a6705"
+    spec:
+      errorHandler:
+        log: {}
+      sink:
+        ref:
+          apiVersion: "camel.apache.org/v1"
+          kind: "Kamelet"
+          name: "connector-sftp-sink"
+      source:
+        ref:
+          apiVersion: "camel.apache.org/v1"
+          kind: "Kamelet"
+          name: "connector-kafka-source"
+  resources:
+  - apiVersion: "camel.apache.org/v1alpha1"
+    kind: "Kamelet"
+    metadata:
+      name: "connector-kafka-source"
+    spec:
+      definition:
+        title: "Managed Kafka Source"
+        description: "Receive data from Managed Kafka topics."
+        required:
+        - "topic"
+        - "bootstrapServers"
+        type: "object"
+        properties:
+          topic:
+            title: "Topic Names"
+            description: "A comma-separated list of Kafka topic names."
+            type: "string"
+          bootstrapServers:
+            title: "Bootstrap Servers"
+            description: "Comma separated list of Kafka Broker URLs"
+            type: "string"
+          securityProtocol:
+            title: "Security Protocol"
+            description: "Protocol used to communicate with brokers. SASL_PLAINTEXT,\
+              \ PLAINTEXT, SASL_SSL and SSL are supported"
+            type: "string"
+          saslMechanism:
+            title: "SASL Mechanism"
+            description: "The Simple Authentication and Security Layer (SASL) Mechanism\
+              \ used."
+            type: "string"
+          user:
+            title: "Username"
+            description: "Username to authenticate to Kafka"
+            type: "string"
+            x-descriptors:
+            - "urn:camel:group:credentials"
+          password:
+            title: "Password"
+            description: "Password to authenticate to kafka"
+            type: "string"
+            format: "password"
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:password"
+            - "urn:camel:group:credentials"
+  - apiVersion: "camel.apache.org/v1alpha1"
+    kind: "Kamelet"
+    metadata:
+      name: "connector-sftp-sink"
+    spec:
+      definition:
+        title: "SFTP Sink"
+        description: |-
+          Send data to an SFTP Server.
+
+          In the header, you can set the `file` / `ce-file` property to specify the filename to upload.
+
+          If you do not set the property in the header, the Kamelet uses the exchange ID for the filename.
+        required:
+        - "connectionHost"
+        - "connectionPort"
+        - "username"
+        - "password"
+        - "directoryName"
+        type: "object"
+        properties:
+          connectionHost:
+            title: "Connection Host"
+            description: "The hostname of the FTP server"
+            type: "string"
+          connectionPort:
+            title: "Connection Port"
+            description: "The port of the FTP server"
+            type: "string"
+            default: 22
+          username:
+            title: "Username"
+            description: "The username to access the FTP server."
+            type: "string"
+            x-descriptors:
+            - "urn:camel:group:credentials"
+          password:
+            title: "Password"
+            description: "The password to access the FTP server."
+            type: "string"
+            format: "password"
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:password"
+            - "urn:camel:group:credentials"
+          directoryName:
+            title: "Directory Name"
+            description: "The starting directory."
+            type: "string"
+          passiveMode:
+            title: "Passive Mode"
+            description: "Specifies to use passive mode connection."
+            type: "boolean"
+            default: false
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:checkbox"
+          fileExist:
+            title: "File Existence"
+            description: "How to behave in case of file already existent."
+            type: "string"
+            default: "Override"
+            enum:
+            - "Override"
+            - "Append"
+            - "Fail"
+            - "Ignore"
+          binary:
+            title: "Binary"
+            description: "Specifies the file transfer mode, BINARY or ASCII. Default\
+              \ is ASCII (false)."
+            type: "boolean"
+            default: false
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:checkbox"
+          autoCreate:
+            title: "Autocreate Missing Directories"
+            description: "Automatically create the directory the files should be written\
+              \ to."
+            type: "boolean"
+            default: true
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:checkbox"

@@ -1,0 +1,178 @@
+apiVersion: "sco1237896.github.com/v1"
+kind: "ConnectorDefinition"
+metadata:
+  name: "sftp_source_v1"
+spec:
+  definition:
+    apiVersion: "camel.apache.org/v1"
+    kind: "Pipe"
+    metadata:
+      annotations:
+        sco1237896.github.com/catalog.group: "storage"
+        sco1237896.github.com/catalog.id: "sftp"
+        sco1237896.github.com/connector.description: "Retrieve data from an SFTP Server."
+        sco1237896.github.com/connector.group: "storage"
+        sco1237896.github.com/connector.id: "sftp_source_v1"
+        sco1237896.github.com/connector.title: "SFTP source"
+        sco1237896.github.com/connector.version: "v1"
+        trait.camel.apache.org/container.request-cpu: "0.20"
+        trait.camel.apache.org/container.request-memory: "128M"
+        trait.camel.apache.org/deployment.progress-deadline-seconds: "30"
+        trait.camel.apache.org/container.image: "quay.io/sco1237896/connector-sftp:main-17140b59c01c7dd0a2d657dfcbf5c346ff4a6705"
+    spec:
+      errorHandler:
+        log: {}
+      sink:
+        ref:
+          apiVersion: "camel.apache.org/v1"
+          kind: "Kamelet"
+          name: "connector-kafka-sink"
+      source:
+        ref:
+          apiVersion: "camel.apache.org/v1"
+          kind: "Kamelet"
+          name: "connector-sftp-source"
+  resources:
+  - apiVersion: "camel.apache.org/v1alpha1"
+    kind: "Kamelet"
+    metadata:
+      name: "connector-sftp-source"
+    spec:
+      definition:
+        title: "SFTP Source"
+        description: "Receive data from an SFTP server."
+        required:
+        - "connectionHost"
+        - "connectionPort"
+        - "username"
+        - "password"
+        - "directoryName"
+        type: "object"
+        properties:
+          connectionHost:
+            title: "Connection Host"
+            description: "The hostname of the SFTP server."
+            type: "string"
+          connectionPort:
+            title: "Connection Port"
+            description: "The port of the FTP server."
+            type: "string"
+            default: 22
+          username:
+            title: "Username"
+            description: "The username to access the SFTP server."
+            type: "string"
+            x-descriptors:
+            - "urn:camel:group:credentials"
+          password:
+            title: "Password"
+            description: "The password to access the SFTP server."
+            type: "string"
+            format: "password"
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:password"
+            - "urn:camel:group:credentials"
+          directoryName:
+            title: "Directory Name"
+            description: "The starting directory."
+            type: "string"
+          passiveMode:
+            title: "Passive Mode"
+            description: "Sets the passive mode connection."
+            type: "boolean"
+            default: false
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:checkbox"
+          recursive:
+            title: "Recursive"
+            description: "If a directory, look for files in all sub-directories as\
+              \ well."
+            type: "boolean"
+            default: false
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:checkbox"
+          idempotent:
+            title: "Idempotency"
+            description: "Skip already-processed files."
+            type: "boolean"
+            default: true
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:checkbox"
+          ignoreFileNotFoundOrPermissionError:
+            title: "Ignore File Not Found Or Permission Error"
+            description: "Whether to ignore when (trying to list files in directories\
+              \ or when downloading a file), which does not exist or due to permission\
+              \ error. By default when a directory or file does not exists or insufficient\
+              \ permission, then an exception is thrown. Setting this option to true\
+              \ allows to ignore that instead."
+            type: "boolean"
+            default: false
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:checkbox"
+          binary:
+            title: "Binary"
+            description: "Specifies the file transfer mode, BINARY or ASCII. Default\
+              \ is ASCII (false)."
+            type: "boolean"
+            default: false
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:checkbox"
+          autoCreate:
+            title: "Autocreate Missing Directories"
+            description: "Automatically create starting directory."
+            type: "boolean"
+            default: true
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:checkbox"
+  - apiVersion: "camel.apache.org/v1alpha1"
+    kind: "Kamelet"
+    metadata:
+      name: "connector-kafka-sink"
+    spec:
+      definition:
+        title: "Managed Kafka Sink"
+        description: |-
+          Send data to Managed Kafka topics.
+
+          Optionally, you can set the following properties in the header:
+
+          - `key`: as message key
+
+          - `partition-key`: as message partition key
+        required:
+        - "topic"
+        - "bootstrapServers"
+        type: "object"
+        properties:
+          topic:
+            title: "Topic Name"
+            description: "The name of the Kafka Topic to use."
+            type: "string"
+          bootstrapServers:
+            title: "Bootstrap Servers"
+            description: "Comma separated list of Kafka Broker URLs"
+            type: "string"
+          securityProtocol:
+            title: "Security Protocol"
+            description: "Protocol used to communicate with brokers. SASL_PLAINTEXT,\
+              \ PLAINTEXT, SASL_SSL and SSL are supported"
+            type: "string"
+          saslMechanism:
+            title: "SASL Mechanism"
+            description: "The Simple Authentication and Security Layer (SASL) Mechanism\
+              \ used."
+            type: "string"
+          user:
+            title: "Username"
+            description: "Username to authenticate to Kafka"
+            type: "string"
+            x-descriptors:
+            - "urn:camel:group:credentials"
+          password:
+            title: "Password"
+            description: "Password to authenticate to kafka"
+            type: "string"
+            format: "password"
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:password"
+            - "urn:camel:group:credentials"
