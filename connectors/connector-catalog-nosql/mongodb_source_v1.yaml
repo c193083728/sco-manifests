@@ -1,0 +1,161 @@
+apiVersion: "sco1237896.github.com/v1"
+kind: "ConnectorDefinition"
+metadata:
+  name: "mongodb_source_v1"
+spec:
+  definition:
+    apiVersion: "camel.apache.org/v1"
+    kind: "Pipe"
+    metadata:
+      annotations:
+        sco1237896.github.com/catalog.group: "nosql"
+        sco1237896.github.com/catalog.id: "mongodb"
+        sco1237896.github.com/connector.description: "Retrieve data from MongoDB"
+        sco1237896.github.com/connector.group: "nosql"
+        sco1237896.github.com/connector.id: "mongodb_source_v1"
+        sco1237896.github.com/connector.title: "MongoDB source"
+        sco1237896.github.com/connector.version: "v1"
+        trait.camel.apache.org/container.request-cpu: "0.20"
+        trait.camel.apache.org/container.request-memory: "128M"
+        trait.camel.apache.org/deployment.progress-deadline-seconds: "30"
+        trait.camel.apache.org/container.image: "quay.io/sco1237896/connector-mongodb:main-17140b59c01c7dd0a2d657dfcbf5c346ff4a6705"
+    spec:
+      errorHandler:
+        log: {}
+      sink:
+        ref:
+          apiVersion: "camel.apache.org/v1"
+          kind: "Kamelet"
+          name: "connector-kafka-sink"
+      source:
+        ref:
+          apiVersion: "camel.apache.org/v1"
+          kind: "Kamelet"
+          name: "connector-mongodb-source"
+  resources:
+  - apiVersion: "camel.apache.org/v1alpha1"
+    kind: "Kamelet"
+    metadata:
+      name: "connector-mongodb-source"
+    spec:
+      definition:
+        title: "MongoDB Source"
+        required:
+        - "hosts"
+        - "collection"
+        - "database"
+        type: "object"
+        properties:
+          hosts:
+            title: "MongoDB Hosts"
+            description: "A comma-separated list of MongoDB host addresses in `host:port`\
+              \ format."
+            type: "string"
+          collection:
+            title: "MongoDB Collection"
+            description: "The name of the MongoDB collection to bind to this endpoint."
+            type: "string"
+          password:
+            title: "MongoDB Password"
+            description: "The user password for accessing MongoDB."
+            type: "string"
+            format: "password"
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:password"
+            - "urn:camel:group:credentials"
+          username:
+            title: "MongoDB Username"
+            description: "The username for accessing MongoDB. The username must be\
+              \ present in the MongoDB's authentication database (`authenticationDatabase`).\
+              \ By default, the MongoDB `authenticationDatabase` is 'admin'."
+            type: "string"
+            x-descriptors:
+            - "urn:camel:group:credentials"
+          ssl:
+            title: "Enable ssl for mongodb connection"
+            description: "whether to enable ssl connection to mongodb"
+            type: "boolean"
+            default: true
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:checkbox"
+          sslValidationEnabled:
+            title: "Enables ssl certificates validation and host name checks."
+            description: "IMPORTANT this should be disabled only in test environment\
+              \ since can pose security issues."
+            type: "boolean"
+            default: true
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:checkbox"
+          database:
+            title: "MongoDB Database"
+            description: "The name of the MongoDB database."
+            type: "string"
+          persistentTailTracking:
+            title: "MongoDB Persistent Tail Tracking"
+            description: "Specifies to enable persistent tail tracking, which is a\
+              \ mechanism to keep track of the last consumed data across system restarts.\
+              \ The next time the system is up, the endpoint recovers the cursor from\
+              \ the point where it last stopped consuimg data. This option will only\
+              \ work on capped collections."
+            type: "boolean"
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:checkbox"
+            default: false
+          tailTrackIncreasingField:
+            title: "MongoDB Tail Track Increasing Field"
+            description: "The correlation field in the incoming data which is of increasing\
+              \ nature and is used to position the tailing cursor every time it is\
+              \ generated."
+            type: "string"
+  - apiVersion: "camel.apache.org/v1alpha1"
+    kind: "Kamelet"
+    metadata:
+      name: "connector-kafka-sink"
+    spec:
+      definition:
+        title: "Managed Kafka Sink"
+        description: |-
+          Send data to Managed Kafka topics.
+
+          Optionally, you can set the following properties in the header:
+
+          - `key`: as message key
+
+          - `partition-key`: as message partition key
+        required:
+        - "topic"
+        - "bootstrapServers"
+        type: "object"
+        properties:
+          topic:
+            title: "Topic Name"
+            description: "The name of the Kafka Topic to use."
+            type: "string"
+          bootstrapServers:
+            title: "Bootstrap Servers"
+            description: "Comma separated list of Kafka Broker URLs"
+            type: "string"
+          securityProtocol:
+            title: "Security Protocol"
+            description: "Protocol used to communicate with brokers. SASL_PLAINTEXT,\
+              \ PLAINTEXT, SASL_SSL and SSL are supported"
+            type: "string"
+          saslMechanism:
+            title: "SASL Mechanism"
+            description: "The Simple Authentication and Security Layer (SASL) Mechanism\
+              \ used."
+            type: "string"
+          user:
+            title: "Username"
+            description: "Username to authenticate to Kafka"
+            type: "string"
+            x-descriptors:
+            - "urn:camel:group:credentials"
+          password:
+            title: "Password"
+            description: "Password to authenticate to kafka"
+            type: "string"
+            format: "password"
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:password"
+            - "urn:camel:group:credentials"

@@ -1,0 +1,163 @@
+apiVersion: "sco1237896.github.com/v1"
+kind: "ConnectorDefinition"
+metadata:
+  name: "cassandra_source_v1"
+spec:
+  definition:
+    apiVersion: "camel.apache.org/v1"
+    kind: "Pipe"
+    metadata:
+      annotations:
+        sco1237896.github.com/catalog.group: "nosql"
+        sco1237896.github.com/catalog.id: "cassandra"
+        sco1237896.github.com/connector.description: "Retrieve data by sending a query\
+          \ to an Apache Cassandra cluster table."
+        sco1237896.github.com/connector.group: "nosql"
+        sco1237896.github.com/connector.id: "cassandra_source_v1"
+        sco1237896.github.com/connector.title: "Apache Cassandra source"
+        sco1237896.github.com/connector.version: "v1"
+        trait.camel.apache.org/container.request-cpu: "0.20"
+        trait.camel.apache.org/container.request-memory: "128M"
+        trait.camel.apache.org/deployment.progress-deadline-seconds: "30"
+        trait.camel.apache.org/container.image: "quay.io/sco1237896/connector-cassandra:main-17140b59c01c7dd0a2d657dfcbf5c346ff4a6705"
+    spec:
+      errorHandler:
+        log: {}
+      sink:
+        ref:
+          apiVersion: "camel.apache.org/v1"
+          kind: "Kamelet"
+          name: "connector-kafka-sink"
+      source:
+        ref:
+          apiVersion: "camel.apache.org/v1"
+          kind: "Kamelet"
+          name: "connector-cassandra-source"
+  resources:
+  - apiVersion: "camel.apache.org/v1alpha1"
+    kind: "Kamelet"
+    metadata:
+      name: "connector-cassandra-source"
+    spec:
+      definition:
+        title: "Cassandra Source"
+        description: "Send a query to an Apache Cassandra cluster table."
+        required:
+        - "connectionHost"
+        - "connectionPort"
+        - "keyspace"
+        - "query"
+        type: "object"
+        properties:
+          connectionHost:
+            title: "Connection Host"
+            description: "The hostname(s) for the Cassandra server(s). Use a comma\
+              \ to separate multiple hostnames."
+            type: "string"
+            example: "localhost"
+          connectionPort:
+            title: "Connection Port"
+            description: "The port number(s) of the cassandra server(s). Use a comma\
+              \ to separate multiple port numbers."
+            type: "string"
+            example: 9042
+          keyspace:
+            title: "Keyspace"
+            description: "The keyspace to use."
+            type: "string"
+            example: "customers"
+          username:
+            title: "Username"
+            description: "The username for accessing a secured Cassandra cluster."
+            type: "string"
+            x-descriptors:
+            - "urn:camel:group:credentials"
+          password:
+            title: "Password"
+            description: "The password for accessing a secured Cassandra cluster."
+            type: "string"
+            format: "password"
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:password"
+            - "urn:camel:group:credentials"
+          resultStrategy:
+            title: "Result Strategy"
+            description: "The strategy to convert the result set of the query. Possible\
+              \ values are ALL, ONE, LIMIT_10, or LIMIT_100."
+            type: "string"
+            default: "ALL"
+          consistencyLevel:
+            title: "Consistency Level"
+            description: "The consistency level to use."
+            type: "string"
+            default: "QUORUM"
+            enum:
+            - "ONE"
+            - "TWO"
+            - "THREE"
+            - "QUORUM"
+            - "ALL"
+            - "LOCAL_QUORUM"
+            - "EACH_QUORUM"
+            - "SERIAL"
+            - "LOCAL_SERIAL"
+            - "LOCAL_ONE"
+          query:
+            title: "Query"
+            description: "The query to execute against the Cassandra cluster table."
+            type: "string"
+      types:
+        out:
+          mediaType: "application/json"
+  - apiVersion: "camel.apache.org/v1alpha1"
+    kind: "Kamelet"
+    metadata:
+      name: "connector-kafka-sink"
+    spec:
+      definition:
+        title: "Managed Kafka Sink"
+        description: |-
+          Send data to Managed Kafka topics.
+
+          Optionally, you can set the following properties in the header:
+
+          - `key`: as message key
+
+          - `partition-key`: as message partition key
+        required:
+        - "topic"
+        - "bootstrapServers"
+        type: "object"
+        properties:
+          topic:
+            title: "Topic Name"
+            description: "The name of the Kafka Topic to use."
+            type: "string"
+          bootstrapServers:
+            title: "Bootstrap Servers"
+            description: "Comma separated list of Kafka Broker URLs"
+            type: "string"
+          securityProtocol:
+            title: "Security Protocol"
+            description: "Protocol used to communicate with brokers. SASL_PLAINTEXT,\
+              \ PLAINTEXT, SASL_SSL and SSL are supported"
+            type: "string"
+          saslMechanism:
+            title: "SASL Mechanism"
+            description: "The Simple Authentication and Security Layer (SASL) Mechanism\
+              \ used."
+            type: "string"
+          user:
+            title: "Username"
+            description: "Username to authenticate to Kafka"
+            type: "string"
+            x-descriptors:
+            - "urn:camel:group:credentials"
+          password:
+            title: "Password"
+            description: "Password to authenticate to kafka"
+            type: "string"
+            format: "password"
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:password"
+            - "urn:camel:group:credentials"

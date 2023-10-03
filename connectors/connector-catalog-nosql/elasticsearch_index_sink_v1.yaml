@@ -1,0 +1,139 @@
+apiVersion: "sco1237896.github.com/v1"
+kind: "ConnectorDefinition"
+metadata:
+  name: "elasticsearch_index_sink_v1"
+spec:
+  definition:
+    apiVersion: "camel.apache.org/v1"
+    kind: "Pipe"
+    metadata:
+      annotations:
+        sco1237896.github.com/catalog.group: "nosql"
+        sco1237896.github.com/catalog.id: "elasticsearch"
+        sco1237896.github.com/connector.description: "Send JSON objects to ElasticSearch.\
+          \ Other JSON data types are not supported."
+        sco1237896.github.com/connector.group: "nosql"
+        sco1237896.github.com/connector.id: "elasticsearch_index_sink_v1"
+        sco1237896.github.com/connector.title: "Elasticsearch Index sink"
+        sco1237896.github.com/connector.version: "v1"
+        trait.camel.apache.org/container.request-cpu: "0.20"
+        trait.camel.apache.org/container.request-memory: "128M"
+        trait.camel.apache.org/deployment.progress-deadline-seconds: "30"
+        trait.camel.apache.org/container.image: "quay.io/sco1237896/connector-elasticsearch:main-17140b59c01c7dd0a2d657dfcbf5c346ff4a6705"
+    spec:
+      errorHandler:
+        log: {}
+      sink:
+        ref:
+          apiVersion: "camel.apache.org/v1"
+          kind: "Kamelet"
+          name: "connector-elasticsearch-index-sink"
+      source:
+        ref:
+          apiVersion: "camel.apache.org/v1"
+          kind: "Kamelet"
+          name: "connector-kafka-source"
+  resources:
+  - apiVersion: "camel.apache.org/v1alpha1"
+    kind: "Kamelet"
+    metadata:
+      name: "connector-kafka-source"
+    spec:
+      definition:
+        title: "Managed Kafka Source"
+        description: "Receive data from Managed Kafka topics."
+        required:
+        - "topic"
+        - "bootstrapServers"
+        type: "object"
+        properties:
+          topic:
+            title: "Topic Names"
+            description: "A comma-separated list of Kafka topic names."
+            type: "string"
+          bootstrapServers:
+            title: "Bootstrap Servers"
+            description: "Comma separated list of Kafka Broker URLs"
+            type: "string"
+          securityProtocol:
+            title: "Security Protocol"
+            description: "Protocol used to communicate with brokers. SASL_PLAINTEXT,\
+              \ PLAINTEXT, SASL_SSL and SSL are supported"
+            type: "string"
+          saslMechanism:
+            title: "SASL Mechanism"
+            description: "The Simple Authentication and Security Layer (SASL) Mechanism\
+              \ used."
+            type: "string"
+          user:
+            title: "Username"
+            description: "Username to authenticate to Kafka"
+            type: "string"
+            x-descriptors:
+            - "urn:camel:group:credentials"
+          password:
+            title: "Password"
+            description: "Password to authenticate to kafka"
+            type: "string"
+            format: "password"
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:password"
+            - "urn:camel:group:credentials"
+  - apiVersion: "camel.apache.org/v1alpha1"
+    kind: "Kamelet"
+    metadata:
+      name: "connector-elasticsearch-index-sink"
+    spec:
+      definition:
+        title: "ElasticSearch Index Sink"
+        description: "Stores JSON-formatted data into ElasticSearch.\n\nThe input\
+          \ data must be formatted in JSON according to the requirements of the index.\
+          \ \n\nIn the header, you can set the following properties:\n\n- `indexId`\
+          \ / `ce-indexid`: The index ID for ElasticSearch.\n\n- `indexName` / `ce-indexname`:\
+          \ The index name for ElasticSearch.\n\nIf you do not set a property in the\
+          \ header, the Kamelet uses the exchange ID for the index setting."
+        required:
+        - "clusterName"
+        - "hostAddresses"
+        type: "object"
+        properties:
+          user:
+            title: "Username"
+            description: "The username to connect to ElasticSearch."
+            type: "string"
+            x-descriptors:
+            - "urn:camel:group:credentials"
+          password:
+            title: "Password"
+            description: "The password to connect to ElasticSearch."
+            type: "string"
+            format: "password"
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:password"
+            - "urn:camel:group:credentials"
+          hostAddresses:
+            title: "Host Addresses"
+            description: "A comma-separated list of remote transport addresses in\
+              \ `ip:port format`."
+            type: "string"
+            example: "quickstart-es-http:9200"
+          clusterName:
+            title: "ElasticSearch Cluster Name"
+            description: "The name of the ElasticSearch cluster."
+            type: "string"
+            example: "quickstart"
+          indexName:
+            title: "Index in ElasticSearch"
+            description: "The name of the ElasticSearch index."
+            type: "string"
+            example: "data"
+          certificate:
+            title: "Certificate"
+            description: "The Certificate for accessing the Elasticsearch cluster.\
+              \ You must encode this value in base64."
+            type: "string"
+      types:
+        out:
+          mediaType: "application/json"
+        in:
+          mediaType: "application/json"

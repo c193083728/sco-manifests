@@ -1,0 +1,142 @@
+apiVersion: "sco1237896.github.com/v1"
+kind: "ConnectorDefinition"
+metadata:
+  name: "minio_source_v1"
+spec:
+  definition:
+    apiVersion: "camel.apache.org/v1"
+    kind: "Pipe"
+    metadata:
+      annotations:
+        sco1237896.github.com/catalog.group: "storage"
+        sco1237896.github.com/catalog.id: "minio"
+        sco1237896.github.com/connector.description: "Retrieve data from MinIO."
+        sco1237896.github.com/connector.group: "storage"
+        sco1237896.github.com/connector.id: "minio_source_v1"
+        sco1237896.github.com/connector.title: "MinIO source"
+        sco1237896.github.com/connector.version: "v1"
+        trait.camel.apache.org/container.request-cpu: "0.20"
+        trait.camel.apache.org/container.request-memory: "128M"
+        trait.camel.apache.org/deployment.progress-deadline-seconds: "30"
+        trait.camel.apache.org/container.image: "quay.io/sco1237896/connector-minio:main-17140b59c01c7dd0a2d657dfcbf5c346ff4a6705"
+    spec:
+      errorHandler:
+        log: {}
+      sink:
+        ref:
+          apiVersion: "camel.apache.org/v1"
+          kind: "Kamelet"
+          name: "connector-kafka-sink"
+      source:
+        ref:
+          apiVersion: "camel.apache.org/v1"
+          kind: "Kamelet"
+          name: "connector-minio-source"
+  resources:
+  - apiVersion: "camel.apache.org/v1alpha1"
+    kind: "Kamelet"
+    metadata:
+      name: "connector-minio-source"
+    spec:
+      definition:
+        title: "Minio Source"
+        description: "Receive data from MinIO."
+        required:
+        - "bucketName"
+        - "accessKey"
+        - "secretKey"
+        - "endpoint"
+        type: "object"
+        properties:
+          bucketName:
+            title: "Bucket Name"
+            description: "The MinIO Bucket name."
+            type: "string"
+          deleteAfterRead:
+            title: "Auto-delete Objects"
+            description: "Delete objects after consuming them."
+            type: "boolean"
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:checkbox"
+            default: true
+          accessKey:
+            title: "Access Key"
+            description: "The access key obtained from MinIO."
+            type: "string"
+            format: "password"
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:password"
+            - "urn:camel:group:credentials"
+          secretKey:
+            title: "Secret Key"
+            description: "The secret key obtained from MinIO."
+            type: "string"
+            format: "password"
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:password"
+            - "urn:camel:group:credentials"
+          endpoint:
+            title: "Endpoint"
+            description: "The MinIO Endpoint. You can specify an URL, domain name,\
+              \ IPv4 address, or IPv6 address."
+            type: "string"
+            example: "http://localhost:9000"
+          autoCreateBucket:
+            title: "Autocreate Bucket"
+            description: "Specifies to automatically create the MinIO bucket."
+            type: "boolean"
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:checkbox"
+            default: false
+  - apiVersion: "camel.apache.org/v1alpha1"
+    kind: "Kamelet"
+    metadata:
+      name: "connector-kafka-sink"
+    spec:
+      definition:
+        title: "Managed Kafka Sink"
+        description: |-
+          Send data to Managed Kafka topics.
+
+          Optionally, you can set the following properties in the header:
+
+          - `key`: as message key
+
+          - `partition-key`: as message partition key
+        required:
+        - "topic"
+        - "bootstrapServers"
+        type: "object"
+        properties:
+          topic:
+            title: "Topic Name"
+            description: "The name of the Kafka Topic to use."
+            type: "string"
+          bootstrapServers:
+            title: "Bootstrap Servers"
+            description: "Comma separated list of Kafka Broker URLs"
+            type: "string"
+          securityProtocol:
+            title: "Security Protocol"
+            description: "Protocol used to communicate with brokers. SASL_PLAINTEXT,\
+              \ PLAINTEXT, SASL_SSL and SSL are supported"
+            type: "string"
+          saslMechanism:
+            title: "SASL Mechanism"
+            description: "The Simple Authentication and Security Layer (SASL) Mechanism\
+              \ used."
+            type: "string"
+          user:
+            title: "Username"
+            description: "Username to authenticate to Kafka"
+            type: "string"
+            x-descriptors:
+            - "urn:camel:group:credentials"
+          password:
+            title: "Password"
+            description: "Password to authenticate to kafka"
+            type: "string"
+            format: "password"
+            x-descriptors:
+            - "urn:alm:descriptor:com.tectonic.ui:password"
+            - "urn:camel:group:credentials"
