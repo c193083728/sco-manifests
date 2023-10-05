@@ -1,0 +1,8 @@
+FROM registry.access.redhat.com/ubi8/ubi-minimal
+
+COPY . /etc/connectors
+
+LABEL name="sco-conenctors-catalog" \
+    vendor="Red Hat" \
+    summary="sco-conenctors-catalog" \
+    description="Smart Connectors Catalog"
