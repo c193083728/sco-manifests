@@ -19,7 +19,7 @@ spec:
         trait.camel.apache.org/container.request-cpu: "0.20"
         trait.camel.apache.org/container.request-memory: "128M"
         trait.camel.apache.org/deployment.progress-deadline-seconds: "30"
-        trait.camel.apache.org/container.image: "quay.io/sco1237896/connector-aws-ddb:main-17140b59c01c7dd0a2d657dfcbf5c346ff4a6705"
+        trait.camel.apache.org/container.image: "quay.io/sco1237896/connector-aws-ddb:main-b0bc19971c883b500f8fbf96545c4dbefdaf8e9a"
     spec:
       errorHandler:
         log: {}
