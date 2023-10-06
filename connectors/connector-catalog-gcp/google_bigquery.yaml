@@ -5,7 +5,7 @@ metadata:
     sco1237896.github.com/catalog.group: "gcp"
     sco1237896.github.com/catalog.name: "google-bigquery"
     sco1237896.github.com/catalog.id: "google_bigquery"
-  name: "quay.io/sco1237896/connector-google-bigquery:main-17140b59c01c7dd0a2d657dfcbf5c346ff4a6705"
+  name: "quay.io/sco1237896/connector-google-bigquery:main-b0bc19971c883b500f8fbf96545c4dbefdaf8e9a"
 spec:
   baseImage: "registry.access.redhat.com/ubi8/openjdk-17-runtime:1.17"
   imageName: "connector-google-bigquery"
@@ -31,7 +31,7 @@ spec:
   - "com.github.docker-java:docker-java-transport@sha256:0b92f5ee1be16423684a5ee9c2d4b901a917e8d6d4e579ea3a4deb9ad0dcac97"
   - "com.github.luben:zstd-jni@sha256:c351640b97274d11a478b30a27ce698ff56f048991bcd3254e1210527221afa5"
   - "com.github.mifmif:generex@sha256:72832c6a1740cb470d601ff8827bd190b9ab02444ebd12c12c324f0d7cbdd35a"
-  - "com.github.sco1237896:connectors-core-deployment@sha256:713abc296d0ea37355a41e9ad3caaf50f57cf29b06cbb76f316017739dc744d1"
+  - "com.github.sco1237896:connectors-core-deployment@sha256:cfb56a14d263adda945c4e5a3a779985aec91fa2630c83219daf47c07689c3a6"
   - "com.github.sco1237896:connectors-core@sha256:370b847af72b6aec00178ddab859d3823ee9de825acb4a09763880ba56c66b1e"
   - "com.github.sco1237896:connectors-kamelets-gcp@sha256:5daba85eb19c99d092c91a9af9bf6f47a2367cf4e52ad254d716cace176b2d56"
   - "com.github.sco1237896:connectors-kamelets-kafka@sha256:20cc70ba9c2cb3d30799f4f552a3063f77488a3505fc52831d89b32c437a28d5"
